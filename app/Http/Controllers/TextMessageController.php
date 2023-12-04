@@ -10,7 +10,7 @@ class TextMessageController extends Controller
 {
     /**
      * Display a listing of the resource.
-     *
+     * Super admin authentication required
      * @return \Illuminate\Http\Response
      */
     public function index() {
@@ -28,18 +28,19 @@ class TextMessageController extends Controller
     public function store(Request $request)
     {
         
-        $validatedData = $request->validate([
-            'phoneNumber' => 'required|unique:users_phone_number|numeric'
+        $request->validate([
+            'phoneNumber' => 'required|unique:users_phone_number|numeric',
+            'message'=> 'required|string'
         ]);
 
         try {
-            // $phone_model = new TextMessage($request->all());
-            // $phone_model->save();
+            $phone_model = new TextMessage($request->all());
+            $phone_model->save();
             $provider = new ServicesSMSProvider();
 
             return [
-                'msg'=> "Phone number registered",
-                'data'=> $provider->get_sms_provider("Your order has been recived !!!", $request->phoneNumber)
+                'msg'=> "Phone number registered & SMS sent",
+                'data'=> $provider->get_sms_provider($request->message, $request->phoneNumber)
             ];
         } catch (\Throwable $error) {
             return [
